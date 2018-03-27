@@ -68,7 +68,7 @@ def _isArrayLike(obj):
 
 
 class COCO:
-    def __init__(self, annotation_file=None):
+    def __init__(self, annotation_file=None, use_single_cat=None):
         """
         Constructor of Microsoft COCO helper class for reading and visualizing annotations.
         :param annotation_file (str): location of annotation file
@@ -84,6 +84,20 @@ class COCO:
             dataset = json.load(open(annotation_file, 'r'))
             assert type(dataset)==dict, 'annotation file format {} not supported'.format(type(dataset))
             print('Done (t={:0.2f}s)'.format(time.time()- tic))
+            
+            if use_single_cat is not None:
+                assert type(use_single_cat)==int, 'use_single_cat must be an integer, type: {}'.format(
+                    type(use_single_cat))
+                # Remove the category if it is not the one of interest
+                dataset['categories'] = [
+                    category for category in dataset['categories'] if category['id']==use_single_cat]
+                
+                print('num annotations: ', len(dataset['annotations']))
+                # Remove all categories from annotations if not use_single_cat
+                dataset['annotations'] = [
+                    annot for annot in dataset['annotations'] if annot['category_id'] == use_single_cat]
+                print('num annotations: ', len(dataset['annotations']))
+
             self.dataset = dataset
             self.createIndex()
 
